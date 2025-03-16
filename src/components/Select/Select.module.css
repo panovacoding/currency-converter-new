@@ -1,0 +1,14 @@
+
+.select {
+  border: 1px solid lightblue;
+  border-radius: 0 4px 4px 0;
+  padding: 4px 8px;
+  width: calc(100% - var(--input-width));
+
+  white-space:nowrap; 
+  text-overflow:ellipsis;
+}
+
+.select:active, .select:focus {
+  outline: none;
+}
