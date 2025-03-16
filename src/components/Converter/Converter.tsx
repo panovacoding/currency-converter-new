@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import styles from './Converter.module.css';
 import Select from '../Select/Select';
-import Input from '../Input/input';
+import Input from '../Input/Input';
 
 type Option = {
   CharCode: string;
