@@ -1,6 +1,7 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import styles from './Converter.module.css';
 import Select from '../Select/Select';
+import Input from '../Input/input';
 
 type Option = {
   CharCode: string;
@@ -18,18 +19,15 @@ type ConverterState = {
 };
 
 const Converter = (): JSX.Element => {
-  const leftInput = useRef<HTMLInputElement | null>(null);
-  const rightInput = useRef<HTMLInputElement | null>(null);
-
   const [currencies, setCurrencies] = useState<string[][]>([['', '']]);
   const [rates, setRates] = useState<Record<string, number>>({});
   const [state, setState] = useState<ConverterState>({
     amount: 0,
-    fromCurrency: 'RUB',
-    toCurrency: 'USD',
+    fromCurrency: 'USD',
+    toCurrency: 'RUB',
     result: 0,
   });
-  const [inputBase, setInputBase] = useState<HTMLInputElement | null>(null);
+  const [inputBase, setInputBase] = useState<string>('amount');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,8 +50,6 @@ const Converter = (): JSX.Element => {
         ]);
         rates.unshift(['RUB', 1]);
         setRates(Object.fromEntries(rates));
-        setInputBase(leftInput.current)
-        console.log(rates)
       } catch (e) {
         console.log(e);
       }
@@ -61,92 +57,76 @@ const Converter = (): JSX.Element => {
     fetchData();
   }, []);
 
-  const handleFromSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-    setState({
-      ...state,
-      fromCurrency: e.target.value,
-    });
+  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>, stateProperty: 'from' | 'to') => {
+    setState((prev) => ({
+      ...prev,
+      [`${stateProperty}Currency`]: e.target.value,
+    }));
   };
 
-  const handleToSelect = (e: ChangeEvent<HTMLSelectElement>) => {
-    setState({
-      ...state,
-      toCurrency: e.target.value,
-    });
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>, stateProperty: 'amount' | 'result') => {
+    setState((prev) => ({
+      ...prev,
+      [stateProperty]: +e.target.value || 0,
+    }));
+    setInputBase(stateProperty);
   };
 
-  const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setState({
-      ...state,
-      amount: +e.target.value || 0,
-    });
-    setInputBase(leftInput.current);
-  };
+  const calculateConversion = () => {
+    const value = state.amount * (rates[state.fromCurrency] / rates[state.toCurrency]);
+    return value > 0.02 ? +(value.toFixed(2)) : +(value.toFixed(4));
+  }
 
-  const handleResultChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setState({
-      ...state,
-      result: +e.target.value || 0,
-    });
-
-    setInputBase(rightInput.current)
-  };
+  const calculateConversionInverse = () => {
+    const value =
+      state.result *
+      (1 / (rates[state.fromCurrency] / rates[state.toCurrency]));
+    return value > 0.02 ? +value.toFixed(2) : +value.toFixed(4);
+  }
 
   useEffect(() => {
-    if (inputBase === rightInput.current) {
+    if (inputBase === 'result') {
       setState((prev) => ({
         ...prev,
-        amount: +(
-          (state.result * ( 1 / (rates[state.fromCurrency] /
-          rates[state.toCurrency])))
-        ).toFixed(6),
+        amount: calculateConversionInverse(),
       }));
       return;
     }
   
-      setState((prev) => ({
-        ...prev,
-        result: +(state.amount * (rates[state.fromCurrency] / rates[state.toCurrency])).toFixed(6),
-      }));
+    setState((prev) => ({
+      ...prev,
+      result: calculateConversion(),
+    }));
 
-
-
-    console.log(state.result);
   }, [state.amount, state.result, state.fromCurrency, state.toCurrency]);
 
   return (
-    <>
-      <div className={styles.converter}>
-        <div className={styles.inputWrap}>
-          <input
-            type='number'
-            className={styles.input}
-            value={state.amount || ''}
-            onChange={(e) => handleAmountChange(e)}
-            ref={leftInput}
-          />
-          <Select
-            options={currencies}
-            value={state.fromCurrency}
-            onChange={handleFromSelect}
-          />
-        </div>
-        <div className={styles.inputWrap}>
-          <input
-            type='number'
-            className={styles.input}
-            value={state.result || ''}
-            onChange={handleResultChange}
-            ref={rightInput}
-          />
-          <Select
-            options={currencies}
-            value={state.toCurrency}
-            onChange={handleToSelect}
-          />
-        </div>
+    <div className={styles.converter}>
+      <div className={styles.inputWrap}>
+        <Input
+          type='number'
+          value={state.amount || ''}
+          onChange={(e) => handleInputChange(e, 'amount')}
+        />
+        <Select
+          options={currencies}
+          value={state.fromCurrency}
+          onChange={(e) => handleSelectChange(e, 'from')}
+        />
       </div>
-    </>
+      <div className={styles.inputWrap}>
+        <Input
+          type='number'
+          value={state.result || ''}
+          onChange={(e) => handleInputChange(e, 'result')}
+        />
+        <Select
+          options={currencies}
+          value={state.toCurrency}
+          onChange={(e) => handleSelectChange(e, 'to')}
+        />
+      </div>
+    </div>
   );
 };
 

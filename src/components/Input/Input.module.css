@@ -1,0 +1,19 @@
+.input {
+  border-radius: 4px 0 0 4px;
+  border: 1px solid lightblue;
+  border-right: none;
+  padding: 4px 6px;
+
+  font-size: 18px;
+  font-family: inherit;
+  width: var(--input-width);
+}
+
+.input:focus, .input:active {
+  outline: none;
+}
+
+.input::-webkit-inner-spin-button {
+  display: none;
+  appearance: none;
+}

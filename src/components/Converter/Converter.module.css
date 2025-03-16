@@ -8,6 +8,10 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 1rem;
+
+  width: 700px;
+  max-width: 100%;
+  margin: auto;
 }
 
 @media (max-width: 991px) {
@@ -18,24 +22,4 @@
 
 .inputWrap {
   display: flex;
-}
-
-.input {
-  border-radius: 4px 0 0 4px;
-  border: 1px solid lightblue;
-  border-right: none;
-  padding: 4px 6px;
-
-  font-size: 18px;
-  font-family: inherit;
-  width: var(--input-width);
-}
-
-.input:focus, .input:active {
-  outline: none;
-}
-
-.input::-webkit-inner-spin-button {
-  display: none;
-  appearance: none;
 }
